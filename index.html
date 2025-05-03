@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip Clock Alternative</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .flip-card {
+            perspective: 1000px;
+            width: 80px;
+            height: 120px;
+            position: relative;
+            display: inline-block;
+            margin: 0 5px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .flip-card.flipping .flip-card-inner {
+            transform: rotateX(-180deg);
+        }
+        
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .flip-card-front {
+            background: #2d3748;
+            color: white;
+            transform: rotateX(0deg);
+        }
+        
+        .dark .flip-card-front {
+            background: #1a202c;
+        }
+        
+        .flip-card-back {
+            background: #1a202c;
+            color: white;
+            transform: rotateX(180deg);
+        }
+        
+        .dark .flip-card-back {
+            background: #2d3748;
+        }
+        
+        .colon {
+            display: inline-block;
+            font-size: 4rem;
+            margin: 0 5px;
+            color: #2d3748;
+            align-self: center;
+        }
+        
+        .dark .colon {
+            color: #e2e8f0;
+        }
+        
+        .clock-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3182ce;
+        }
+        
+        .btn-danger {
+            background-color: #f56565;
+            color: white;
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background-color: #e53e3e;
+        }
+        
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            border: none;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+        }
+        
+        .dark .btn-secondary {
+            background-color: #4a5568;
+            color: #f7fafc;
+        }
+        
+        .dark .btn-secondary:hover {
+            background-color: #2d3748;
+        }
+        
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn.active {
+            border-bottom: 3px solid #4299e1;
+            color: #4299e1;
+        }
+        
+        .dark .tab-btn {
+            color: #e2e8f0;
+        }
+        
+        .dark .tab-btn.active {
+            color: #63b3ed;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .preset-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background-color: #e2e8f0;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preset-btn:hover {
+            background-color: #cbd5e0;
+        }
+        
+        .dark .preset-btn {
+            background-color: #4a5568;
+            color: #f7fafc;
+        }
+        
+        .dark .preset-btn:hover {
+            background-color: #2d3748;
+        }
+        
+        .input-group {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .time-input {
+            width: 60px;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #cbd5e0;
+            text-align: center;
+        }
+        
+        .dark .time-input {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #f7fafc;
+        }
+        
+        .label {
+            align-self: center;
+            color: #4a5568;
+        }
+        
+        .dark .label {
+            color: #e2e8f0;
+        }
+        
+        .timezone-info {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: #4a5568;
+        }
+        
+        .dark .timezone-info {
+            color: #a0aec0;
+        }
+        
+        .clock-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2d3748;
+        }
+        
+        .dark .clock-title {
+            color: #f7fafc;
+        }
+        
+        .dark {
+            background-color: #1a202c;
+            color: #f7fafc;
+        }
+        
+        .dark .text-gray-800 {
+            color: #f7fafc;
+        }
+        
+        .dark .bg-gray-100 {
+            background-color: #1a202c;
+        }
+        
+        .dark .bg-white {
+            background-color: #2d3748;
+        }
+        
+        .dark .text-gray-700 {
+            color: #e2e8f0;
+        }
+        
+        .dark .border-gray-200 {
+            border-color: #4a5568;
+        }
+        
+        .toggle-container {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background-color: #e2e8f0;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .dark .toggle-btn {
+            background-color: #4a5568;
+            color: #f7fafc;
+        }
+        
+        .toggle-btn.active {
+            background-color: #4299e1;
+            color: white;
+        }
+        
+        .dark .toggle-btn.active {
+            background-color: #63b3ed;
+        }
+        
+        .am-pm {
+            font-size: 1.5rem;
+            font-weight: bold;
+            align-self: center;
+            margin-left: 0.5rem;
+        }
+        
+        .dark .am-pm {
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 transition-colors duration-200">
+    <div class="container mx-auto px-4 relative">
+        <!-- Dark Mode and Time Format Toggle -->
+        <div class="toggle-container">
+            <button id="dark-mode-toggle" class="toggle-btn">
+                <i class="fas fa-moon"></i>
+                <span>Dark</span>
+            </button>
+            <button id="time-format-toggle" class="toggle-btn">
+                <i class="far fa-clock"></i>
+                <span>24h</span>
+            </button>
+        </div>
+        
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-10">Flip Clock</h1>
+        
+        <!-- Current Time Section -->
+        <div class="mb-12">
+            <div class="clock-title">Indian Standard Time (IST)</div>
+            <div class="timezone-info">
+                <i class="fas fa-globe-asia mr-2"></i> UTC+5:30
+            </div>
+            <div class="clock-container" id="current-time-display">
+                <div class="flip-card" data-digit="hours-tens">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="flip-card" data-digit="hours-ones">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="colon">:</div>
+                <div class="flip-card" data-digit="minutes-tens">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="flip-card" data-digit="minutes-ones">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="colon">:</div>
+                <div class="flip-card" data-digit="seconds-tens">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="flip-card" data-digit="seconds-ones">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div id="am-pm-indicator" class="am-pm"></div>
+            </div>
+            <div class="text-center text-gray-600 mt-2 dark:text-gray-300">
+                <span id="current-date"></span>
+                <span class="mx-2">•</span>
+                <span id="current-day"></span>
+            </div>
+        </div>
+        
+        <div class="tab-container">
+            <button class="tab-btn active" data-tab="timer">Timer</button>
+            <button class="tab-btn" data-tab="stopwatch">Stopwatch</button>
+        </div>
+        
+        <!-- Timer Tab -->
+        <div id="timer" class="tab-content active">
+            <div class="preset-buttons">
+                <button class="preset-btn" data-minutes="1">1 min</button>
+                <button class="preset-btn" data-minutes="5">5 min</button>
+                <button class="preset-btn" data-minutes="10">10 min</button>
+                <button class="preset-btn" data-minutes="15">15 min</button>
+                <button class="preset-btn" data-minutes="30">30 min</button>
+            </div>
+            
+            <div class="input-group">
+                <input type="number" id="hours-input" class="time-input" min="0" max="23" value="0">
+                <span class="label">h</span>
+                <input type="number" id="minutes-input" class="time-input" min="0" max="59" value="0">
+                <span class="label">m</span>
+                <input type="number" id="seconds-input" class="time-input" min="0" max="59" value="0">
+                <span class="label">s</span>
+            </div>
+            
+            <div class="clock-container" id="timer-display">
+                <div class="flip-card" data-digit="hours-tens">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="flip-card" data-digit="hours-ones">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="colon">:</div>
+                <div class="flip-card" data-digit="minutes-tens">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="flip-card" data-digit="minutes-ones">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="colon">:</div>
+                <div class="flip-card" data-digit="seconds-tens">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="flip-card" data-digit="seconds-ones">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="start-timer" class="btn btn-primary">
+                    <i class="fas fa-play mr-2"></i> Start
+                </button>
+                <button id="pause-timer" class="btn btn-secondary" disabled>
+                    <i class="fas fa-pause mr-2"></i> Pause
+                </button>
+                <button id="reset-timer" class="btn btn-danger">
+                    <i class="fas fa-redo mr-2"></i> Reset
+                </button>
+            </div>
+        </div>
+        
+        <!-- Stopwatch Tab -->
+        <div id="stopwatch" class="tab-content">
+            <div class="clock-container" id="stopwatch-display">
+                <div class="flip-card" data-digit="hours-tens">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="flip-card" data-digit="hours-ones">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="colon">:</div>
+                <div class="flip-card" data-digit="minutes-tens">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="flip-card" data-digit="minutes-ones">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="colon">:</div>
+                <div class="flip-card" data-digit="seconds-tens">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+                <div class="flip-card" data-digit="seconds-ones">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">0</div>
+                        <div class="flip-card-back">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="start-stopwatch" class="btn btn-primary">
+                    <i class="fas fa-play mr-2"></i> Start
+                </button>
+                <button id="pause-stopwatch" class="btn btn-secondary" disabled>
+                    <i class="fas fa-pause mr-2"></i> Pause
+                </button>
+                <button id="lap-stopwatch" class="btn btn-secondary" disabled>
+                    <i class="fas fa-flag mr-2"></i> Lap
+                </button>
+                <button id="reset-stopwatch" class="btn btn-danger">
+                    <i class="fas fa-redo mr-2"></i> Reset
+                </button>
+            </div>
+            
+            <div class="mt-8 max-w-md mx-auto">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4 dark:text-gray-200">Laps</h3>
+                <div id="laps-container" class="bg-white rounded-lg shadow p-4 max-h-64 overflow-y-auto dark:bg-gray-800">
+                    <!-- Laps will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const timeFormatToggle = document.getElementById('time-format-toggle');
+        let is24HourFormat = true;
+        
+        // Check for saved user preference or use system preference
+        if (localStorage.getItem('darkMode') === 'true' || 
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            darkModeToggle.classList.add('active');
+            darkModeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Light</span>';
+        }
+        
+        if (localStorage.getItem('timeFormat') === '12') {
+            is24HourFormat = false;
+            timeFormatToggle.classList.add('active');
+            timeFormatToggle.innerHTML = '<i class="far fa-clock"></i><span>12h</span>';
+        }
+        
+        darkModeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+            
+            if (isDark) {
+                darkModeToggle.classList.add('active');
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Light</span>';
+            } else {
+                darkModeToggle.classList.remove('active');
+                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i><span>Dark</span>';
+            }
+        });
+        
+        timeFormatToggle.addEventListener('click', () => {
+            is24HourFormat = !is24HourFormat;
+            localStorage.setItem('timeFormat', is24HourFormat ? '24' : '12');
+            
+            if (is24HourFormat) {
+                timeFormatToggle.classList.remove('active');
+                timeFormatToggle.innerHTML = '<i class="far fa-clock"></i><span>24h</span>';
+            } else {
+                timeFormatToggle.classList.add('active');
+                timeFormatToggle.innerHTML = '<i class="far fa-clock"></i><span>12h</span>';
+            }
+            
+            // Update current time display immediately
+            updateCurrentTime();
+        });
+
+        // Tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons and content
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding content
+                btn.classList.add('active');
+                const tabId = btn.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Current Time (Indian Standard Time) functionality
+        function updateCurrentTime() {
+            // Get current time in Indian Standard Time (UTC+5:30)
+            const now = new Date();
+            const utcOffset = now.getTimezoneOffset() + 330; // 330 minutes = 5.5 hours
+            now.setMinutes(now.getMinutes() + utcOffset);
+            
+            let hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            
+            // Handle 12-hour format
+            let ampm = '';
+            if (!is24HourFormat) {
+                ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // Convert 0 to 12
+            }
+            
+            // Update AM/PM indicator
+            const ampmIndicator = document.getElementById('am-pm-indicator');
+            ampmIndicator.textContent = is24HourFormat ? '' : ampm;
+            
+            // Update flip clock display
+            updateFlipCards('current-time-display', hours, minutes, seconds);
+            
+            // Update date and day
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-IN', options);
+            document.getElementById('current-day').textContent = now.toLocaleDateString('en-IN', { weekday: 'long' });
+        }
+        
+        // Update current time every second
+        setInterval(updateCurrentTime, 1000);
+        updateCurrentTime(); // Initial call
+
+        // Timer functionality
+        let timerInterval;
+        let timerSeconds = 0;
+        let isTimerRunning = false;
+        
+        // Timer elements
+        const startTimerBtn = document.getElementById('start-timer');
+        const pauseTimerBtn = document.getElementById('pause-timer');
+        const resetTimerBtn = document.getElementById('reset-timer');
+        const hoursInput = document.getElementById('hours-input');
+        const minutesInput = document.getElementById('minutes-input');
+        const secondsInput = document.getElementById('seconds-input');
+        
+        // Preset buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const minutes = parseInt(btn.getAttribute('data-minutes'));
+                hoursInput.value = 0;
+                minutesInput.value = minutes;
+                secondsInput.value = 0;
+                updateTimerDisplay(0, minutes, 0);
+            });
+        });
+        
+        // Update timer display with hours, minutes, seconds
+        function updateTimerDisplay(hours, minutes, seconds) {
+            const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+            timerSeconds = totalSeconds;
+            
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            
+            updateFlipCards('timer-display', h, m, s);
+        }
+        
+        // Start timer
+        startTimerBtn.addEventListener('click', () => {
+            if (isTimerRunning) return;
+            
+            const hours = parseInt(hoursInput.value) || 0;
+            const minutes = parseInt(minutesInput.value) || 0;
+            const seconds = parseInt(secondsInput.value) || 0;
+            
+            timerSeconds = hours * 3600 + minutes * 60 + seconds;
+            
+            if (timerSeconds <= 0) return;
+            
+            isTimerRunning = true;
+            startTimerBtn.disabled = true;
+            pauseTimerBtn.disabled = false;
+            
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    startTimerBtn.disabled = false;
+                    pauseTimerBtn.disabled = true;
+                    // Play sound or show notification when timer ends
+                }
+                
+                const h = Math.floor(timerSeconds / 3600);
+                const m = Math.floor((timerSeconds % 3600) / 60);
+                const s = timerSeconds % 60;
+                
+                updateFlipCards('timer-display', h, m, s);
+            }, 1000);
+        });
+        
+        // Pause timer
+        pauseTimerBtn.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            startTimerBtn.disabled = false;
+            pauseTimerBtn.disabled = true;
+        });
+        
+        // Reset timer
+        resetTimerBtn.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            startTimerBtn.disabled = false;
+            pauseTimerBtn.disabled = true;
+            
+            const hours = parseInt(hoursInput.value) || 0;
+            const minutes = parseInt(minutesInput.value) || 0;
+            const seconds = parseInt(secondsInput.value) || 0;
+            
+            updateTimerDisplay(hours, minutes, seconds);
+        });
+        
+        // Stopwatch functionality
+        let stopwatchInterval;
+        let stopwatchSeconds = 0;
+        let isStopwatchRunning = false;
+        let lapCount = 1;
+        
+        // Stopwatch elements
+        const startStopwatchBtn = document.getElementById('start-stopwatch');
+        const pauseStopwatchBtn = document.getElementById('pause-stopwatch');
+        const lapStopwatchBtn = document.getElementById('lap-stopwatch');
+        const resetStopwatchBtn = document.getElementById('reset-stopwatch');
+        const lapsContainer = document.getElementById('laps-container');
+        
+        // Start stopwatch
+        startStopwatchBtn.addEventListener('click', () => {
+            if (isStopwatchRunning) return;
+            
+            isStopwatchRunning = true;
+            startStopwatchBtn.disabled = true;
+            pauseStopwatchBtn.disabled = false;
+            lapStopwatchBtn.disabled = false;
+            
+            const startTime = Date.now() - stopwatchSeconds * 1000;
+            
+            stopwatchInterval = setInterval(() => {
+                stopwatchSeconds = Math.floor((Date.now() - startTime) / 1000);
+                
+                const h = Math.floor(stopwatchSeconds / 3600);
+                const m = Math.floor((stopwatchSeconds % 3600) / 60);
+                const s = stopwatchSeconds % 60;
+                
+                updateFlipCards('stopwatch-display', h, m, s);
+            }, 1000);
+        });
+        
+        // Pause stopwatch
+        pauseStopwatchBtn.addEventListener('click', () => {
+            clearInterval(stopwatchInterval);
+            isStopwatchRunning = false;
+            startStopwatchBtn.disabled = false;
+            pauseStopwatchBtn.disabled = true;
+        });
+        
+        // Lap stopwatch
+        lapStopwatchBtn.addEventListener('click', () => {
+            const h = Math.floor(stopwatchSeconds / 3600);
+            const m = Math.floor((stopwatchSeconds % 3600) / 60);
+            const s = stopwatchSeconds % 60;
+            
+            const lapTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            
+            const lapElement = document.createElement('div');
+            lapElement.className = 'flex justify-between py-2 border-b border-gray-200 dark:border-gray-700';
+            lapElement.innerHTML = `
+                <span class="font-medium">Lap ${lapCount}</span>
+                <span class="font-mono">${lapTime}</span>
+            `;
+            
+            lapsContainer.prepend(lapElement);
+            lapCount++;
+        });
+        
+        // Reset stopwatch
+        resetStopwatchBtn.addEventListener('click', () => {
+            clearInterval(stopwatchInterval);
+            isStopwatchRunning = false;
+            stopwatchSeconds = 0;
+            lapCount = 1;
+            
+            startStopwatchBtn.disabled = false;
+            pauseStopwatchBtn.disabled = true;
+            lapStopwatchBtn.disabled = true;
+            
+            updateFlipCards('stopwatch-display', 0, 0, 0);
+            lapsContainer.innerHTML = '';
+        });
+        
+        // Update flip cards with new time values
+        function updateFlipCards(containerId, hours, minutes, seconds) {
+            const timeString = `${String(hours).padStart(2, '0')}${String(minutes).padStart(2, '0')}${String(seconds).padStart(2, '0')}`;
+            const container = document.getElementById(containerId);
+            
+            // Get all flip cards in the container
+            const flipCards = container.querySelectorAll('.flip-card');
+            
+            flipCards.forEach((card, index) => {
+                const currentDigit = card.querySelector('.flip-card-front').textContent;
+                const newDigit = timeString[index];
+                
+                if (currentDigit !== newDigit) {
+                    // Trigger flip animation
+                    card.classList.add('flipping');
+                    
+                    // Update the back face (which will become the front after flip)
+                    card.querySelector('.flip-card-back').textContent = newDigit;
+                    
+                    // After animation completes, update the front face and remove flipping class
+                    setTimeout(() => {
+                        card.querySelector('.flip-card-front').textContent = newDigit;
+                        card.classList.remove('flipping');
+                    }, 600);
+                }
+            });
+        }
+        
+        // Initialize displays
+        updateTimerDisplay(0, 0, 0);
+        updateFlipCards('stopwatch-display', 0, 0, 0);
+    </script>
+</body>
+</html>
